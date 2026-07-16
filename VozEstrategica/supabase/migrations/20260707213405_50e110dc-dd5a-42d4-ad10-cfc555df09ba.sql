@@ -1,0 +1,2 @@
+ALTER TABLE public.pedidos_libros DROP CONSTRAINT pedidos_libros_estado_pago_check;
+ALTER TABLE public.pedidos_libros ADD CONSTRAINT pedidos_libros_estado_pago_check CHECK (estado_pago = ANY (ARRAY['pendiente'::text, 'aprobado'::text, 'rechazado'::text, 'cancelado'::text]));

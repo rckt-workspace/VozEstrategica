@@ -1,0 +1,45 @@
+# Blueprint de Render para "Voz Estratégica" (TanStack Start sobre Vite + Nitro).
+# El código de la app vive en el subdirectorio "Voz Estratégica" (rootDir), por eso
+# este archivo se deja en la raíz del repo: así Render lo detecta automáticamente
+# al crear el Blueprint ("New +" -> "Blueprint" en el dashboard).
+#
+# El build usa el preset "node-server" de Nitro (definido en
+# "Voz Estratégica/vite.config.ts"), NO el bundle de Cloudflare Workers que usa
+# wrangler.jsonc para las previews/hosting de Lovable — ese archivo sigue
+# existiendo y no se toca, solo deja de ser el target por defecto fuera del
+# sandbox de Lovable.
+#
+# Las variables marcadas con `sync: false` debes ingresarlas a mano en el
+# dashboard de Render (nunca se leen del repo ni del .env local).
+services:
+  - type: web
+    name: voz-estrategica
+    runtime: node
+    plan: starter # subir a "standard" si hay tráfico de campañas/masterclass simultáneo
+    region: oregon
+    branch: main
+    rootDir: "Voz Estratégica"
+    buildCommand: |
+      curl -fsSL https://bun.sh/install | bash
+      export BUN_INSTALL="$HOME/.bun"
+      export PATH="$BUN_INSTALL/bin:$PATH"
+      bun install --frozen-lockfile
+      bun run build
+    startCommand: node .output/server/index.mjs
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_SUPABASE_PROJECT_ID
+        sync: false

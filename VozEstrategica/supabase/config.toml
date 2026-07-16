@@ -1,0 +1,7 @@
+project_id = "eyebjcvagagztrfsllir"
+
+[functions.notify-subscriber]
+verify_jwt = false
+
+[functions.notify-book-order]
+verify_jwt = false
