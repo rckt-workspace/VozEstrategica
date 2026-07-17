@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Users, Mic2, GraduationCap, BookOpen } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { FlowDiagram } from "@/components/FlowDiagram";
+import { SpeakerPromoCard } from "@/components/SpeakerPromoCard";
 
 import { speakers, events, books } from "@/data/content";
 
@@ -378,6 +379,19 @@ function Home() {
               Ver todos los conferencistas →
             </Link>
           </div>
+        </Reveal>
+      </section>
+
+      {/* 7.5 PROMO SPEAKER */}
+      <section className="mx-auto max-w-7xl px-6 pb-16 md:pb-20">
+        <Reveal>
+          <SpeakerPromoCard
+            badge="Nuevo · CDMX"
+            titulo="Diego Camacho: IA aplicada a ventas y marketing"
+            descripcion="Ideal para líderes comerciales y equipos de marketing en CDMX."
+            textoBoton="Conocer a Diego Camacho →"
+            link="/mx/diego-camacho"
+          />
         </Reveal>
       </section>
 
