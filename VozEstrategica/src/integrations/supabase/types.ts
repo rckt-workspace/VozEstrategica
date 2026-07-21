@@ -73,9 +73,12 @@ export type Database = {
           autor_speaker_id: string | null
           created_at: string
           descripcion: string | null
+          formato: string | null
           id: string
           link_compra: string | null
           portada_url: string | null
+          precio: number | null
+          sku: string | null
           titulo: string
           updated_at: string
         }
@@ -84,9 +87,12 @@ export type Database = {
           autor_speaker_id?: string | null
           created_at?: string
           descripcion?: string | null
+          formato?: string | null
           id?: string
           link_compra?: string | null
           portada_url?: string | null
+          precio?: number | null
+          sku?: string | null
           titulo: string
           updated_at?: string
         }
@@ -95,9 +101,12 @@ export type Database = {
           autor_speaker_id?: string | null
           created_at?: string
           descripcion?: string | null
+          formato?: string | null
           id?: string
           link_compra?: string | null
           portada_url?: string | null
+          precio?: number | null
+          sku?: string | null
           titulo?: string
           updated_at?: string
         }
@@ -136,10 +145,12 @@ export type Database = {
         Row: {
           ciudad: string
           created_at: string
+          cta_label: string | null
           descripcion: string | null
           fecha: string
           id: string
           imagen_url: string | null
+          landing_url: string | null
           speaker_id: string | null
           titulo: string
           updated_at: string
@@ -147,10 +158,12 @@ export type Database = {
         Insert: {
           ciudad: string
           created_at?: string
+          cta_label?: string | null
           descripcion?: string | null
           fecha: string
           id?: string
           imagen_url?: string | null
+          landing_url?: string | null
           speaker_id?: string | null
           titulo: string
           updated_at?: string
@@ -158,10 +171,12 @@ export type Database = {
         Update: {
           ciudad?: string
           created_at?: string
+          cta_label?: string | null
           descripcion?: string | null
           fecha?: string
           id?: string
           imagen_url?: string | null
+          landing_url?: string | null
           speaker_id?: string | null
           titulo?: string
           updated_at?: string
@@ -175,6 +190,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      media_gallery_images: {
+        Row: {
+          alt: string | null
+          created_at: string
+          gallery_key: string
+          id: string
+          orden: number
+          slot_key: string | null
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          created_at?: string
+          gallery_key: string
+          id?: string
+          orden?: number
+          slot_key?: string | null
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          created_at?: string
+          gallery_key?: string
+          id?: string
+          orden?: number
+          slot_key?: string | null
+          url?: string
+        }
+        Relationships: []
       }
       orders: {
         Row: {
@@ -292,40 +337,49 @@ export type Database = {
       }
       speakers: {
         Row: {
-          bio: string | null
+          bio: string[] | null
+          charlas: string[]
           created_at: string
           destacado: boolean
           especialidad: string
           foto_url: string | null
+          fuente: string | null
           id: string
           nombre: string
           orden: number
+          quote: string | null
           slug: string
           tematicas: string[]
           updated_at: string
         }
         Insert: {
-          bio?: string | null
+          bio?: string[] | null
+          charlas?: string[]
           created_at?: string
           destacado?: boolean
           especialidad: string
           foto_url?: string | null
+          fuente?: string | null
           id?: string
           nombre: string
           orden?: number
+          quote?: string | null
           slug: string
           tematicas?: string[]
           updated_at?: string
         }
         Update: {
-          bio?: string | null
+          bio?: string[] | null
+          charlas?: string[]
           created_at?: string
           destacado?: boolean
           especialidad?: string
           foto_url?: string | null
+          fuente?: string | null
           id?: string
           nombre?: string
           orden?: number
+          quote?: string | null
           slug?: string
           tematicas?: string[]
           updated_at?: string

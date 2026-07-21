@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { speakers } from "@/data/content";
+import { getSpeakers } from "@/lib/content-queries";
 
 const BASE_URL = "https://vozestrategica.com";
 
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/sitemap.xml")({
     handlers: {
       GET: async () => {
         const today = new Date().toISOString().slice(0, 10);
+        const speakers = await getSpeakers();
 
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },

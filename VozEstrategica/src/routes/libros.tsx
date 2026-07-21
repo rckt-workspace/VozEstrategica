@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHero } from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";
-import { books, speakers } from "@/data/content";
+import { getBooks } from "@/lib/content-queries";
 
 export const Route = createFileRoute("/libros")({
-  head: () => ({
+  loader: () => getBooks(),
+  head: ({ loaderData }) => {
+    const books = loaderData ?? [];
+    return {
     meta: [
       { title: "Libros de nuestros speakers — Voz Estratégica" },
       {
@@ -33,17 +36,19 @@ export const Route = createFileRoute("/libros")({
             name: b.titulo,
             datePublished: String(b.anio),
             description: b.descripcion,
-            image: b.portada,
+            image: b.portada_url,
           })),
         ),
       },
     ],
-  }),
+  };
+  },
 
   component: LibrosPage,
 });
 
 function LibrosPage() {
+  const books = Route.useLoaderData();
   return (
     <>
       <PageHero
@@ -64,13 +69,13 @@ function LibrosPage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {books.map((b, i) => {
-            const autor = speakers.find((s) => s.slug === b.autorSlug);
+            const autor = b.autor;
             return (
               <Reveal key={b.id} delay={i * 80}>
                 <article className="group">
                   <div className="overflow-hidden rounded-2xl bg-foreground/5">
                     <img
-                      src={b.portada}
+                      src={b.portada_url ?? ""}
                       alt={`Portada de ${b.titulo}`}
                       loading="lazy"
                       width={768}

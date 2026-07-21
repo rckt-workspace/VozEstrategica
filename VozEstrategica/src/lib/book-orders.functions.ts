@@ -3,27 +3,11 @@ import { createHash, randomBytes } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { BOLD_IDENTITY_KEY } from "./bold.functions";
 
-// Server-side catálogo — precio y formato NUNCA vienen del cliente
-const CATALOG = {
-  "clientes-fans": {
-    titulo: "De Clientes a Fans",
-    precio: 65000,
-    formato: "fisico" as const,
-  },
-  "milagrosamente-bien": {
-    titulo: "MilagrosaMENTE bien",
-    precio: 62000,
-    formato: "fisico" as const,
-  },
-  "ebook-paola": {
-    titulo: "Ebook Paola Aldaz",
-    precio: 30000,
-    formato: "digital" as const,
-  },
-};
-type Sku = keyof typeof CATALOG;
+// Precio, formato y título se consultan en la tabla `books` en el momento
+// del cobro (ver handler de createBookOrder) — NUNCA vienen del cliente.
+// La tabla es la única fuente de verdad; se edita desde /admin/libros.
 
-const ORDER_ID_RE = /^LIBRO-[a-z-]+-\d{10,16}-[a-f0-9]{8}$/;
+const ORDER_ID_RE = /^LIBRO-[a-z0-9-]+-\d{10,16}-[a-f0-9]{8}$/;
 
 function isEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
@@ -62,8 +46,8 @@ type CreateInput = {
 
 export const createBookOrder = createServerFn({ method: "POST" })
   .inputValidator((data: CreateInput) => {
-    const sku = trimStr(data.sku) as Sku;
-    if (!(sku in CATALOG)) throw new Error("Producto no válido");
+    const sku = trimStr(data.sku, 60);
+    if (!sku) throw new Error("Producto no válido");
     const cantidad = Math.round(Number(data.cantidad));
     if (!Number.isFinite(cantidad) || cantidad < 1 || cantidad > 20) {
       throw new Error("Cantidad no válida");
@@ -74,27 +58,33 @@ export const createBookOrder = createServerFn({ method: "POST" })
     if (!isEmail(email)) throw new Error("Email no válido");
     const telefono = trimStr(data.telefono, 40);
     if (telefono.length < 7) throw new Error("Teléfono no válido");
+    const direccion = trimStr(data.direccion, 300) || null;
+    const ciudad = trimStr(data.ciudad, 100) || null;
+    const departamento = trimStr(data.departamento, 100) || null;
 
-    const meta = CATALOG[sku];
-    let direccion: string | null = null;
-    let ciudad: string | null = null;
-    let departamento: string | null = null;
-    if (meta.formato === "fisico") {
-      direccion = trimStr(data.direccion, 300);
-      ciudad = trimStr(data.ciudad, 100);
-      departamento = trimStr(data.departamento, 100);
-      if (!direccion || !ciudad || !departamento) {
-        throw new Error("Dirección, ciudad y departamento son requeridos");
-      }
-    }
     return { sku, cantidad, nombre, email, telefono, direccion, ciudad, departamento };
   })
   .handler(async ({ data }) => {
     const secret = process.env.BOLD_SECRET_KEY;
     if (!secret) throw new Error("BOLD_SECRET_KEY no configurado");
 
-    const meta = CATALOG[data.sku as Sku];
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Precio/formato/título se leen de la tabla `books` — nunca del cliente.
+    const { data: book, error: bookError } = await supabaseAdmin
+      .from("books")
+      .select("titulo, precio, formato")
+      .eq("sku", data.sku)
+      .maybeSingle();
+    if (bookError) throw new Error(bookError.message);
+    if (!book || book.precio == null || !book.formato) {
+      throw new Error("Producto no válido");
+    }
+    const meta = book as { titulo: string; precio: number; formato: "fisico" | "digital" };
+
+    if (meta.formato === "fisico" && (!data.direccion || !data.ciudad || !data.departamento)) {
+      throw new Error("Dirección, ciudad y departamento son requeridos");
+    }
 
     // Flete desde configuracion
     const { data: cfg } = await supabaseAdmin

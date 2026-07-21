@@ -3,21 +3,28 @@ import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import {
   getSpeaker,
-  speakers,
-  eventsForSpeaker,
-  booksForSpeaker,
-} from "@/data/content";
+  getSpeakers,
+  eventsForSpeakerId,
+  booksForSpeakerId,
+} from "@/lib/content-queries";
 
 export const Route = createFileRoute("/speakers/$slug")({
-  loader: ({ params }) => {
-    const speaker = getSpeaker(params.slug);
+  loader: async ({ params }) => {
+    const speaker = await getSpeaker(params.slug);
     if (!speaker) throw notFound();
-    return { speaker };
+    const [events, books, allSpeakers] = await Promise.all([
+      eventsForSpeakerId(speaker.id),
+      booksForSpeakerId(speaker.id),
+      getSpeakers(),
+    ]);
+    const others = allSpeakers.filter((s) => s.slug !== speaker.slug).slice(0, 3);
+    return { speaker, events, books, others };
   },
   head: ({ params, loaderData }) => {
     const s = loaderData?.speaker;
     if (!s) return { meta: [] };
-    const bioText = s.bio.join(" ");
+    const bioText = (s.bio ?? []).join(" ");
+    const foto = s.foto_url ?? "";
     const canonical = `https://vozestrategica.com/speakers/${params.slug}`;
     const isDiego = params.slug === "diego-camacho";
     return {
@@ -26,13 +33,13 @@ export const Route = createFileRoute("/speakers/$slug")({
         { name: "description", content: `${s.nombre}, ${s.especialidad}. ${bioText.slice(0, 130)}` },
         { property: "og:title", content: `${s.nombre} — ${s.especialidad}` },
         { property: "og:description", content: bioText.slice(0, 160) },
-        { property: "og:image", content: s.foto },
+        { property: "og:image", content: foto },
         { property: "og:url", content: canonical },
         { property: "og:type", content: "profile" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: `${s.nombre} — ${s.especialidad}` },
         { name: "twitter:description", content: bioText.slice(0, 160) },
-        { name: "twitter:image", content: s.foto },
+        { name: "twitter:image", content: foto },
       ],
       links: [
         { rel: "canonical", href: canonical },
@@ -60,7 +67,7 @@ export const Route = createFileRoute("/speakers/$slug")({
                 name: s.nombre,
                 jobTitle: s.especialidad,
                 description: bioText,
-                image: s.foto,
+                image: foto,
                 url: canonical,
               },
               {
@@ -90,10 +97,7 @@ export const Route = createFileRoute("/speakers/$slug")({
 });
 
 function SpeakerDetail() {
-  const { speaker } = Route.useLoaderData();
-  const evs = eventsForSpeaker(speaker.slug);
-  const bks = booksForSpeaker(speaker.slug);
-  const others = speakers.filter((s) => s.slug !== speaker.slug).slice(0, 3);
+  const { speaker, events: evs, books: bks, others } = Route.useLoaderData();
 
   return (
     <>
@@ -106,7 +110,7 @@ function SpeakerDetail() {
           <Reveal>
             <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-foreground/5">
               <img
-                src={speaker.foto}
+                src={speaker.foto_url ?? ""}
                 alt={`Retrato editorial de ${speaker.nombre}`}
                 width={768}
                 height={1024}
@@ -134,7 +138,7 @@ function SpeakerDetail() {
                 </blockquote>
               ) : null}
               <div className="mt-8 space-y-5 text-lg text-muted-foreground">
-                {speaker.bio.map((p: string, i: number) => (
+                {(speaker.bio ?? []).map((p: string, i: number) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
@@ -223,7 +227,7 @@ function SpeakerDetail() {
             {bks.map((b) => (
               <div key={b.id} className="overflow-hidden rounded-2xl bg-foreground/5">
                 <img
-                  src={b.portada}
+                  src={b.portada_url ?? ""}
                   alt={`Portada de ${b.titulo}`}
                   loading="lazy"
                   width={768}
@@ -251,7 +255,7 @@ function SpeakerDetail() {
               className="group relative block aspect-[3/4] overflow-hidden rounded-3xl"
             >
               <img
-                src={s.foto}
+                src={s.foto_url ?? ""}
                 alt={s.nombre}
                 loading="lazy"
                 width={768}

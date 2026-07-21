@@ -16,6 +16,9 @@ interface Book {
   anio: number | null;
   link_compra: string | null;
   autor_speaker_id: string | null;
+  sku: string | null;
+  precio: number | null;
+  formato: string | null;
 }
 interface SpkOpt { id: string; nombre: string }
 
@@ -24,6 +27,7 @@ function AdminLibros() {
   const [spks, setSpks] = useState<SpkOpt[]>([]);
   const [draft, setDraft] = useState({
     titulo: "", portada_url: "", descripcion: "", anio: "", link_compra: "", autor_speaker_id: "",
+    sku: "", precio: "", formato: "",
   });
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +53,9 @@ function AdminLibros() {
 
   async function save() {
     if (!draft.titulo) return toast.error("Falta título.");
+    if (draft.sku && draft.formato && !draft.precio) {
+      return toast.error("Si vas a vender el libro, indicá el precio.");
+    }
     const { error } = await supabase.from("books").insert({
       titulo: draft.titulo,
       portada_url: draft.portada_url || null,
@@ -56,10 +63,16 @@ function AdminLibros() {
       anio: draft.anio ? Number(draft.anio) : null,
       link_compra: draft.link_compra || null,
       autor_speaker_id: draft.autor_speaker_id || null,
+      sku: draft.sku || null,
+      precio: draft.precio ? Number(draft.precio) : null,
+      formato: draft.formato || null,
     });
     if (error) return toast.error(error.message);
     toast.success("Libro creado");
-    setDraft({ titulo: "", portada_url: "", descripcion: "", anio: "", link_compra: "", autor_speaker_id: "" });
+    setDraft({
+      titulo: "", portada_url: "", descripcion: "", anio: "", link_compra: "", autor_speaker_id: "",
+      sku: "", precio: "", formato: "",
+    });
     load();
   }
 
@@ -88,7 +101,21 @@ function AdminLibros() {
               {spks.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
             </select>
           </label>
-          <I label="Link de compra" v={draft.link_compra} on={(v) => setDraft({ ...draft, link_compra: v })} />
+          <I label="Link de compra externo (opcional)" v={draft.link_compra} on={(v) => setDraft({ ...draft, link_compra: v })} />
+          <I label="SKU para cobro con Bold (opcional)" v={draft.sku} on={(v) => setDraft({ ...draft, sku: v })} />
+          <I label="Precio COP (si se vende con Bold)" v={draft.precio} on={(v) => setDraft({ ...draft, precio: v })} />
+          <label className="block">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">Formato</span>
+            <select
+              value={draft.formato}
+              onChange={(e) => setDraft({ ...draft, formato: e.target.value })}
+              className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3"
+            >
+              <option value="">—</option>
+              <option value="fisico">Físico</option>
+              <option value="digital">Digital</option>
+            </select>
+          </label>
           <div className="md:col-span-2">
             <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">Descripción</span>
             <textarea rows={3} value={draft.descripcion} onChange={(e) => setDraft({ ...draft, descripcion: e.target.value })} className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3" />
@@ -120,6 +147,11 @@ function AdminLibros() {
                   <div className="flex-1">
                     <div className="font-display text-lg uppercase">{b.titulo}</div>
                     <div className="text-xs text-muted-foreground">{b.anio ?? ""}</div>
+                    {b.sku && b.precio ? (
+                      <div className="mt-1 text-xs font-semibold text-brand">
+                        {b.sku} · ${b.precio.toLocaleString("es-CO")} · {b.formato}
+                      </div>
+                    ) : null}
                   </div>
                   <button onClick={() => remove(b.id)} className="self-start rounded-full border border-destructive/40 p-1.5 text-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Trash2 className="h-4 w-4" />

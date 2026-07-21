@@ -21,16 +21,7 @@ import {
 } from "lucide-react";
 import carlosImg from "@/assets/speaker-carlos-laguna.jpg";
 import logoVozEstrategica from "@/assets/logo-voz-estrategica-masterclass.png";
-import gallerySpeaker from "@/assets/carlos-gallery/speaker.jpg.asset.json";
-import galleryExma from "@/assets/carlos-gallery/exma.jpg.asset.json";
-import galleryCreators from "@/assets/carlos-gallery/creators.jpg.asset.json";
-import galleryPanel from "@/assets/carlos-gallery/panel.jpg.asset.json";
-import galleryRichbot from "@/assets/carlos-gallery/richbot.jpg.asset.json";
-import galleryEden from "@/assets/carlos-gallery/eden.jpg.asset.json";
-import galleryMercedes from "@/assets/carlos-gallery/mercedes.jpg.asset.json";
-import galleryMercedes2 from "@/assets/carlos-gallery/mercedes2.jpg.asset.json";
-import galleryColsanitas from "@/assets/carlos-gallery/colsanitas.jpg.asset.json";
-import galleryCrehana from "@/assets/carlos-gallery/crehana.jpg.asset.json";
+import { getGallery, gallerySlotMap } from "@/lib/content-queries";
 import { trackEvent } from "@/lib/meta-pixel";
 import { trackGA4Event } from "@/lib/ga4";
 import { openBoldEmbeddedCheckout } from "@/lib/bold-checkout";
@@ -156,6 +147,7 @@ export const Route = createFileRoute("/masterclass-de-clientes-a-fans")({
       },
     ],
   }),
+  loader: async () => gallerySlotMap(await getGallery("carlos-masterclass")),
   component: MasterclassPage,
 });
 
@@ -570,6 +562,7 @@ function DiscountCodeField() {
 }
 
 function MasterclassPage() {
+  const gallery = Route.useLoaderData();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const activeDiscount = useActiveDiscount();
 
@@ -761,7 +754,7 @@ function MasterclassPage() {
           </div>
           <div className="relative">
             <img
-              src={galleryCrehana.url}
+              src={gallery.crehana?.url ?? ""}
               alt="Carlos Laguna, autor de De clientes a fans"
               className="aspect-[4/5] w-full rounded-[3px] object-cover shadow-2xl"
             />
@@ -935,7 +928,7 @@ function MasterclassPage() {
           <div>
             <div className="relative">
               <img
-                src={galleryMercedes2.url}
+                src={gallery.mercedes2?.url ?? ""}
                 alt="Carlos Laguna frente a concesionario Mercedes-Benz Autoland"
                 className="aspect-[4/5] w-full rounded-[3px] object-cover shadow-2xl"
                 loading="lazy"
@@ -1003,7 +996,7 @@ function MasterclassPage() {
             {/* Hero - speaker (2x2) */}
             <figure className="group relative col-span-2 row-span-2 overflow-hidden rounded-[3px] bg-black">
               <img
-                src={gallerySpeaker.url}
+                src={gallery.speaker?.url ?? ""}
                 alt="Carlos Laguna en conferencia frente a auditorio lleno"
                 className="aspect-square h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 style={{ objectPosition: "50% 35%" }}
@@ -1022,7 +1015,7 @@ function MasterclassPage() {
             {/* EXMA */}
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryExma.url}
+                src={gallery.exma?.url ?? ""}
                 alt="Carlos Laguna en EXMA explicando la curva de adopción de la innovación"
                 className="aspect-square h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1037,7 +1030,7 @@ function MasterclassPage() {
             {/* Creators */}
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryCreators.url}
+                src={gallery.creators?.url ?? ""}
                 alt="Carlos Laguna firmando su libro De clientes a fans con asistentes"
                 className="aspect-square h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1052,7 +1045,7 @@ function MasterclassPage() {
             {/* Panel */}
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryPanel.url}
+                src={gallery.panel?.url ?? ""}
                 alt="Carlos Laguna como moderador en panel sobre comercio y experiencia"
                 className="aspect-square h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1067,7 +1060,7 @@ function MasterclassPage() {
             {/* Richbot */}
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryRichbot.url}
+                src={gallery.richbot?.url ?? ""}
                 alt="Carlos Laguna con equipo presentando el proyecto Richbot"
                 className="aspect-square h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1082,7 +1075,7 @@ function MasterclassPage() {
             {/* Mercedes / wide */}
             <figure className="group relative col-span-2 overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryMercedes.url}
+                src={gallery.mercedes?.url ?? ""}
                 alt="Activación de marca Mercedes Benz con clientes y equipo de CPC Group"
                 className="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1097,7 +1090,7 @@ function MasterclassPage() {
             {/* Edentainment */}
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryEden.url}
+                src={gallery.eden?.url ?? ""}
                 alt="Carlos Laguna en lanzamiento Edentainment con equipo de centro comercial El Edén"
                 className="aspect-square h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1112,7 +1105,7 @@ function MasterclassPage() {
             {/* Colsanitas */}
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryColsanitas.url}
+                src={gallery.colsanitas?.url ?? ""}
                 alt="Carlos Laguna con equipo de Colsanitas en experiencia el ingrediente perfecto"
                 className="aspect-square h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
@@ -1129,7 +1122,7 @@ function MasterclassPage() {
           <div className="mt-3 grid grid-cols-1 gap-3 md:mt-4 md:gap-4">
             <figure className="group relative overflow-hidden rounded-[3px] bg-black">
               <img
-                src={galleryCrehana.url}
+                src={gallery.crehana?.url ?? ""}
                 alt="Carlos Laguna como speaker oficial de Crehana"
                 className="aspect-[16/7] h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
