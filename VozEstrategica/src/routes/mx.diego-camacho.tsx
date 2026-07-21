@@ -24,9 +24,9 @@ import { Reveal } from "@/components/Reveal";
 import { Logo } from "@/components/Logo";
 import { trackEvent } from "@/lib/meta-pixel";
 import { trackGA4Event } from "@/lib/ga4";
-import diegoHeroAsset from "@/assets/diego-mx/diego-hero-ai.png.asset.json";
+import diegoHeroAsset from "@/assets/diego-mx/diego-hero-ai.png";
 import diegoPortraitCleanUrl from "@/assets/diego-mx/diego-portrait-clean.png";
-import diegoBookingAsset from "@/assets/diego-mx/diego-booking.png.asset.json";
+import diegoBookingAsset from "@/assets/diego-mx/diego-booking.png";
 
 const CANONICAL = "https://vozestrategica.com/mx/diego-camacho";
 const WHATSAPP_NUMBER = "573106598108";
@@ -241,7 +241,7 @@ function Page() {
             <Reveal delay={0.2}>
               <div className="relative flex items-center justify-center">
                 <img
-                  src={diegoHeroAsset.url}
+                  src={diegoHeroAsset}
                   alt="Diego Camacho en escenario junto a un holograma con el texto AI e íconos tecnológicos"
                   width={1080}
                   height={1080}
@@ -393,7 +393,7 @@ function Page() {
               <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
                 <div className="flex items-center justify-center">
                   <img
-                    src={diegoBookingAsset.url}
+                    src={diegoBookingAsset}
                     alt="Diego Camacho en escenario presentando el caso real de Booking.com sobre implementación de IA de Google y aumento del 15% en valor promedio de transacción"
                     loading="lazy"
                     width={1080}
