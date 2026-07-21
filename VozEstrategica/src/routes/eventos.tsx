@@ -2,10 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";
-import { events, speakers } from "@/data/content";
+import { getEvents } from "@/lib/content-queries";
 
 export const Route = createFileRoute("/eventos")({
-  head: () => ({
+  loader: () => getEvents(),
+  head: ({ loaderData }) => {
+    const events = loaderData ?? [];
+    return {
     meta: [
       { title: "Eventos y conferencias 2026 — Voz Estratégica" },
       {
@@ -39,12 +42,14 @@ export const Route = createFileRoute("/eventos")({
         ),
       },
     ],
-  }),
+  };
+  },
 
   component: EventosPage,
 });
 
 function EventosPage() {
+  const events = Route.useLoaderData();
   return (
     <>
       <PageHero
@@ -66,7 +71,7 @@ function EventosPage() {
         <div className="mx-auto max-w-7xl px-6">
           <ul className="divide-y divide-background/15">
             {events.map((ev, i) => {
-              const spk = speakers.find((s) => s.slug === ev.speakerSlug);
+              const spk = ev.speaker;
               return (
                 <Reveal as="li" key={ev.id} delay={i * 80}>
                   <div className="group flex flex-col gap-4 py-10 transition-all duration-500 hover:bg-background/5 hover:px-6 md:flex-row md:items-center md:gap-10">
@@ -93,13 +98,13 @@ function EventosPage() {
                           Con {spk.nombre} →
                         </Link>
                       ) : null}
-                      {ev.landingUrl ? (
+                      {ev.landing_url ? (
                         <div className="mt-3">
                           <a
-                            href={ev.landingUrl}
+                            href={ev.landing_url}
                             className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-background hover:text-brand"
                           >
-                            {ev.ctaLabel ?? "Ver detalles"} →
+                            {ev.cta_label ?? "Ver detalles"} →
                           </a>
                         </div>
                       ) : null}

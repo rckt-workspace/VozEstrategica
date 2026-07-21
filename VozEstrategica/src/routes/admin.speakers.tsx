@@ -14,7 +14,10 @@ interface Speaker {
   nombre: string;
   especialidad: string;
   foto_url: string | null;
-  bio: string | null;
+  bio: string[] | null;
+  charlas: string[];
+  quote: string | null;
+  fuente: string | null;
   tematicas: string[];
   destacado: boolean;
   orden: number;
@@ -25,7 +28,10 @@ const empty: Omit<Speaker, "id"> = {
   nombre: "",
   especialidad: "",
   foto_url: "",
-  bio: "",
+  bio: [],
+  charlas: [],
+  quote: "",
+  fuente: "",
   tematicas: [],
   destacado: false,
   orden: 0,
@@ -35,6 +41,8 @@ function AdminSpeakers() {
   const [list, setList] = useState<Speaker[]>([]);
   const [draft, setDraft] = useState(empty);
   const [tematicasStr, setTematicasStr] = useState("");
+  const [bioStr, setBioStr] = useState("");
+  const [charlasStr, setCharlasStr] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -68,12 +76,23 @@ function AdminSpeakers() {
     }
     setSaving(true);
     const tematicas = tematicasStr.split(",").map((t) => t.trim()).filter(Boolean);
-    const { error } = await supabase.from("speakers").insert({ ...draft, tematicas });
+    const bio = bioStr.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+    const charlas = charlasStr.split("\n").map((c) => c.trim()).filter(Boolean);
+    const { error } = await supabase.from("speakers").insert({
+      ...draft,
+      tematicas,
+      bio,
+      charlas,
+      quote: draft.quote || null,
+      fuente: draft.fuente || null,
+    });
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Speaker creado");
     setDraft(empty);
     setTematicasStr("");
+    setBioStr("");
+    setCharlasStr("");
     load();
   }
 
@@ -94,12 +113,27 @@ function AdminSpeakers() {
           <Input label="Nombre" value={draft.nombre} onChange={(v) => setDraft({ ...draft, nombre: v })} />
           <Input label="Especialidad" value={draft.especialidad} onChange={(v) => setDraft({ ...draft, especialidad: v })} />
           <Input label="Temáticas (coma)" value={tematicasStr} onChange={setTematicasStr} placeholder="Liderazgo, Cultura" />
+          <Input label="Frase destacada (opcional)" value={draft.quote ?? ""} onChange={(v) => setDraft({ ...draft, quote: v })} />
+          <Input label="Fuente / link de referencia (opcional)" value={draft.fuente ?? ""} onChange={(v) => setDraft({ ...draft, fuente: v })} />
           <div className="md:col-span-2">
-            <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">Bio</span>
+            <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Bio (separá los párrafos con una línea en blanco)
+            </span>
             <textarea
-              rows={4}
-              value={draft.bio ?? ""}
-              onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
+              rows={5}
+              value={bioStr}
+              onChange={(e) => setBioStr(e.target.value)}
+              className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Charlas insignia (una por línea)
+            </span>
+            <textarea
+              rows={3}
+              value={charlasStr}
+              onChange={(e) => setCharlasStr(e.target.value)}
               className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3"
             />
           </div>

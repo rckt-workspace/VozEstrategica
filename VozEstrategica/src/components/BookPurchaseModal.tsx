@@ -3,7 +3,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { X, Minus, Plus, Loader2 } from "lucide-react";
 import { createBookOrder, getConfiguracion } from "@/lib/book-orders.functions";
-import type { BookSku, BookFormato } from "@/data/content";
+import type { BookFormato } from "@/lib/content-queries";
+
+type BookSku = string;
 
 const BOLD_SCRIPT_SRC = "https://checkout.bold.co/library/boldPaymentButton.js";
 

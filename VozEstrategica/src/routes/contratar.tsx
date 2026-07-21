@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { PageHero } from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";
 import { supabase } from "@/integrations/supabase/client";
-import { speakers } from "@/data/content";
+import { getSpeakers } from "@/lib/content-queries";
 import { trackEvent } from "@/lib/meta-pixel";
 import { trackGA4Event } from "@/lib/ga4";
 
@@ -38,6 +38,7 @@ export const Route = createFileRoute("/contratar")({
   validateSearch: (s: Record<string, unknown>) => ({
     speaker: typeof s.speaker === "string" ? s.speaker : undefined,
   }),
+  loader: () => getSpeakers(),
   head: () => ({
     meta: [
       { title: "Solicitar propuesta — Voz Estratégica" },
@@ -63,6 +64,7 @@ export const Route = createFileRoute("/contratar")({
 });
 
 function ContratarPage() {
+  const speakers = Route.useLoaderData();
   const { speaker: prefSpeaker } = useSearch({ from: "/contratar" });
 
   const {
@@ -97,7 +99,7 @@ function ContratarPage() {
       tipo_evento: values.interes,
       presupuesto: values.presupuesto || null,
       mensaje: mensajeCompleto,
-      speaker_id: null,
+      speaker_id: spk?.id ?? null,
       estado: "nuevo",
     });
 

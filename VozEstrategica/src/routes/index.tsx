@@ -4,9 +4,17 @@ import { Reveal } from "@/components/Reveal";
 import { FlowDiagram } from "@/components/FlowDiagram";
 import { SpeakerPromoCard } from "@/components/SpeakerPromoCard";
 
-import { speakers, events, books } from "@/data/content";
+import { getSpeakers, getEvents, getBooks } from "@/lib/content-queries";
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const [speakers, events, books] = await Promise.all([
+      getSpeakers(),
+      getEvents(),
+      getBooks(),
+    ]);
+    return { speakers, events, books };
+  },
   head: () => ({
     meta: [
       { title: "Voz Estratégica — Aprendizaje corporativo, liderazgo y transformación" },
@@ -62,6 +70,7 @@ const ESCALERA = [
 const METODO = ["Diagnóstico", "Conferencia", "Talleres", "Seguimiento", "Medición"];
 
 function Home() {
+  const { speakers, events, books } = Route.useLoaderData();
   const destacados = speakers;
   const marqueeNames = [...speakers, ...speakers].map((s) => s.nombre);
 
@@ -345,7 +354,7 @@ function Home() {
               >
                 <div className="relative mb-6 aspect-[3/4] overflow-hidden bg-foreground/5">
                   <img
-                    src={s.foto}
+                    src={s.foto_url ?? ""}
                     alt={`Retrato de ${s.nombre}`}
                     loading="lazy"
                     width={768}
@@ -413,12 +422,11 @@ function Home() {
 
           <ul className="mt-16 divide-y divide-background/15">
             {events.map((ev, i) => {
-              const isMasterclass = ev.id === "ev-0";
-              if (isMasterclass) {
+              if (ev.landing_url) {
                 return (
                   <Reveal as="li" key={ev.id} delay={i * 80}>
                     <a
-                      href="https://vozestrategica.com/masterclass-de-clientes-a-fans"
+                      href={ev.landing_url}
                       className="group flex flex-col gap-4 bg-[#16A34A] py-8 transition-all duration-500 hover:bg-[#15803D] hover:px-6 md:flex-row md:items-center md:gap-10"
                     >
                       <div className="font-mono text-sm font-bold uppercase tracking-widest text-white md:w-40 md:pl-6">
@@ -433,7 +441,7 @@ function Home() {
                         </div>
                       </div>
                       <span className="inline-flex shrink-0 items-center rounded-full bg-white px-3 py-1 text-xs font-bold text-[#16A34A] md:mr-6">
-                        Cupos abiertos
+                        {ev.cta_label ?? "Cupos abiertos"}
                       </span>
                       <ArrowUpRight className="h-6 w-6 text-white transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 md:mr-6" />
                     </a>
@@ -491,7 +499,7 @@ function Home() {
                     className="group block overflow-hidden rounded-2xl bg-foreground/5"
                   >
                     <img
-                      src={b.portada}
+                      src={b.portada_url ?? ""}
                       alt={`Portada de ${b.titulo}`}
                       loading="lazy"
                       width={768}

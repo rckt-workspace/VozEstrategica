@@ -6,9 +6,10 @@ import { PageHero } from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";
 import { BookPurchaseModal } from "@/components/BookPurchaseModal";
 import { subscribeToNewsletter } from "@/lib/subscribers.functions";
-import { books, type Book } from "@/data/content";
+import { getBooks, type BookWithAuthor, type BookFormato } from "@/lib/content-queries";
 
 export const Route = createFileRoute("/recursos")({
+  loader: () => getBooks(),
   head: () => ({
     meta: [
       { title: "Recursos — Voz Estratégica" },
@@ -30,10 +31,11 @@ export const Route = createFileRoute("/recursos")({
 });
 
 function RecursosPage() {
+  const books = Route.useLoaderData();
   const subscribe = useServerFn(subscribeToNewsletter);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [openBook, setOpenBook] = useState<Book | null>(null);
+  const [openBook, setOpenBook] = useState<BookWithAuthor | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -116,7 +118,7 @@ function RecursosPage() {
             <Reveal key={b.id} delay={i * 60}>
               <div className="group flex h-full flex-col overflow-hidden rounded-2xl bg-foreground/5">
                 <img
-                  src={b.portada}
+                  src={b.portada_url ?? ""}
                   alt={`Portada de ${b.titulo}`}
                   loading="lazy"
                   width={768}
@@ -185,7 +187,7 @@ function RecursosPage() {
           sku={openBook.sku}
           titulo={openBook.titulo}
           precio={openBook.precio}
-          formato={openBook.formato}
+          formato={openBook.formato as BookFormato}
         />
       )}
     </>

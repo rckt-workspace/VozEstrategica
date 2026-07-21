@@ -91,10 +91,10 @@ function AdminLayout() {
             ["/admin", "Solicitudes"],
             ["/admin/suscriptores", "Suscriptores"],
             ["/admin/pedidos-libros", "Pedidos de libros"],
-            // Ocultas por pedido del cliente (rutas siguen activas):
-            // ["/admin/eventos", "Eventos"],
-            // ["/admin/speakers", "Speakers"],
-            // ["/admin/libros", "Libros"],
+            ["/admin/speakers", "Speakers"],
+            ["/admin/libros", "Libros"],
+            ["/admin/eventos", "Eventos"],
+            ["/admin/galeria", "Galería"],
           ].map(([to, label]) => (
             <Link
               key={to}
