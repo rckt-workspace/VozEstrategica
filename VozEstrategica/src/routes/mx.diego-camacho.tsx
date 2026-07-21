@@ -24,7 +24,9 @@ import { Reveal } from "@/components/Reveal";
 import { Logo } from "@/components/Logo";
 import { trackEvent } from "@/lib/meta-pixel";
 import { trackGA4Event } from "@/lib/ga4";
-import { getGallery, gallerySlotMap } from "@/lib/content-queries";
+import diegoHeroAsset from "@/assets/diego-mx/diego-hero-ai.png";
+import diegoPortraitCleanUrl from "@/assets/diego-mx/diego-portrait-clean.png";
+import diegoBookingAsset from "@/assets/diego-mx/diego-booking.png";
 
 const CANONICAL = "https://vozestrategica.com/mx/diego-camacho";
 const WHATSAPP_NUMBER = "573106598108";
@@ -75,12 +77,10 @@ export const Route = createFileRoute("/mx/diego-camacho")({
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
   }),
-  loader: async () => gallerySlotMap(await getGallery("diego-mx")),
   component: Page,
 });
 
 function Page() {
-  const gallery = Route.useLoaderData();
   const [submitted, setSubmitted] = useState(false);
   const {
     register,
@@ -241,7 +241,7 @@ function Page() {
             <Reveal delay={0.2}>
               <div className="relative flex items-center justify-center">
                 <img
-                  src={gallery.hero?.url ?? ""}
+                  src={diegoHeroAsset}
                   alt="Diego Camacho en escenario junto a un holograma con el texto AI e íconos tecnológicos"
                   width={1080}
                   height={1080}
@@ -393,7 +393,7 @@ function Page() {
               <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
                 <div className="flex items-center justify-center">
                   <img
-                    src={gallery.booking?.url ?? ""}
+                    src={diegoBookingAsset}
                     alt="Diego Camacho en escenario presentando el caso real de Booking.com sobre implementación de IA de Google y aumento del 15% en valor promedio de transacción"
                     loading="lazy"
                     width={1080}
@@ -463,7 +463,7 @@ function Page() {
               <div className="relative mx-auto flex h-full w-full max-w-[340px] flex-col overflow-hidden rounded-xl border border-black/10 bg-[#0F0F0F] shadow-sm xl:max-w-[380px]">
                 <div className="relative min-h-0 flex-1 overflow-hidden">
                   <img
-                    src={gallery["portrait-clean"]?.url ?? ""}
+                    src={diegoPortraitCleanUrl}
                     alt="Retrato de Diego Camacho en traje negro"
                     loading="lazy"
                     width={800}
