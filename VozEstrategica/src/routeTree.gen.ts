@@ -34,6 +34,7 @@ import { Route as AdminSuscriptoresRouteImport } from './routes/admin.suscriptor
 import { Route as AdminSpeakersRouteImport } from './routes/admin.speakers'
 import { Route as AdminPedidosLibrosRouteImport } from './routes/admin.pedidos-libros'
 import { Route as AdminLibrosRouteImport } from './routes/admin.libros'
+import { Route as AdminGaleriaRouteImport } from './routes/admin.galeria'
 import { Route as AdminEventosRouteImport } from './routes/admin.eventos'
 import { Route as SpeakersDiegoCamachoMexicoRouteImport } from './routes/speakers.diego-camacho.mexico'
 
@@ -163,6 +164,11 @@ const AdminLibrosRoute = AdminLibrosRouteImport.update({
   path: '/libros',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminGaleriaRoute = AdminGaleriaRouteImport.update({
+  id: '/galeria',
+  path: '/galeria',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEventosRoute = AdminEventosRouteImport.update({
   id: '/eventos',
   path: '/eventos',
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soluciones': typeof SolucionesRoute
   '/admin/eventos': typeof AdminEventosRoute
+  '/admin/galeria': typeof AdminGaleriaRoute
   '/admin/libros': typeof AdminLibrosRoute
   '/admin/pedidos-libros': typeof AdminPedidosLibrosRoute
   '/admin/speakers': typeof AdminSpeakersRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soluciones': typeof SolucionesRoute
   '/admin/eventos': typeof AdminEventosRoute
+  '/admin/galeria': typeof AdminGaleriaRoute
   '/admin/libros': typeof AdminLibrosRoute
   '/admin/pedidos-libros': typeof AdminPedidosLibrosRoute
   '/admin/speakers': typeof AdminSpeakersRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/soluciones': typeof SolucionesRoute
   '/admin/eventos': typeof AdminEventosRoute
+  '/admin/galeria': typeof AdminGaleriaRoute
   '/admin/libros': typeof AdminLibrosRoute
   '/admin/pedidos-libros': typeof AdminPedidosLibrosRoute
   '/admin/speakers': typeof AdminSpeakersRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/soluciones'
     | '/admin/eventos'
+    | '/admin/galeria'
     | '/admin/libros'
     | '/admin/pedidos-libros'
     | '/admin/speakers'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/soluciones'
     | '/admin/eventos'
+    | '/admin/galeria'
     | '/admin/libros'
     | '/admin/pedidos-libros'
     | '/admin/speakers'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/soluciones'
     | '/admin/eventos'
+    | '/admin/galeria'
     | '/admin/libros'
     | '/admin/pedidos-libros'
     | '/admin/speakers'
@@ -552,6 +564,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLibrosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/galeria': {
+      id: '/admin/galeria'
+      path: '/galeria'
+      fullPath: '/admin/galeria'
+      preLoaderRoute: typeof AdminGaleriaRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/eventos': {
       id: '/admin/eventos'
       path: '/eventos'
@@ -571,6 +590,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminEventosRoute: typeof AdminEventosRoute
+  AdminGaleriaRoute: typeof AdminGaleriaRoute
   AdminLibrosRoute: typeof AdminLibrosRoute
   AdminPedidosLibrosRoute: typeof AdminPedidosLibrosRoute
   AdminSpeakersRoute: typeof AdminSpeakersRoute
@@ -580,6 +600,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminEventosRoute: AdminEventosRoute,
+  AdminGaleriaRoute: AdminGaleriaRoute,
   AdminLibrosRoute: AdminLibrosRoute,
   AdminPedidosLibrosRoute: AdminPedidosLibrosRoute,
   AdminSpeakersRoute: AdminSpeakersRoute,

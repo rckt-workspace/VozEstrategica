@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ArrowRight, Sparkles, Mic2, Users, Award, MessageCircle } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { supabase } from "@/integrations/supabase/client";
-import { getSpeaker } from "@/data/content";
+import { getSpeaker } from "@/lib/content-queries";
 import { trackEvent } from "@/lib/meta-pixel";
 import { trackGA4Event } from "@/lib/ga4";
 
@@ -167,6 +167,7 @@ export const Route = createFileRoute("/speakers/diego-camacho/mexico")({
       },
     ],
   }),
+  loader: () => getSpeaker("diego-camacho"),
   component: DiegoMexicoLanding,
 });
 
@@ -183,7 +184,7 @@ function whatsappLink() {
 }
 
 function DiegoMexicoLanding() {
-  const diego = getSpeaker("diego-camacho");
+  const diego = Route.useLoaderData();
   if (!diego) return null;
 
   return (
@@ -237,7 +238,7 @@ function DiegoMexicoLanding() {
           <Reveal>
             <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-foreground/10 bg-card shadow-2xl">
               <img
-                src={diego.foto}
+                src={diego.foto_url ?? ""}
                 alt="Diego Camacho, conferencista internacional especializado en IA, ventas y marketing digital, disponible para eventos en Ciudad de México"
                 loading="eager"
                 fetchPriority="high"

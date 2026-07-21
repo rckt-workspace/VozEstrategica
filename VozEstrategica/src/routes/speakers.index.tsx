@@ -3,9 +3,10 @@ import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";
-import { speakers, type Speaker } from "@/data/content";
+import { getSpeakers, type Speaker } from "@/lib/content-queries";
 
 export const Route = createFileRoute("/speakers/")({
+  loader: () => getSpeakers(),
   head: () => ({
     meta: [
       { title: "Speakers y conferencistas — Voz Estratégica" },
@@ -80,6 +81,7 @@ const CATEGORIES: { id: CategoryId; label: string; match: (s: Speaker) => boolea
 ];
 
 function SpeakersPage() {
+  const speakers = Route.useLoaderData();
   const [category, setCategory] = useState<CategoryId>("todas");
   const activeCat = CATEGORIES.find((c) => c.id === category) ?? CATEGORIES[0];
   const list = speakers.filter(activeCat.match);
@@ -131,7 +133,7 @@ function SpeakersPage() {
                 className="group relative block aspect-[3/4] overflow-hidden rounded-3xl bg-foreground/5"
               >
                 <img
-                  src={s.foto}
+                  src={s.foto_url ?? ""}
                   alt={`Retrato de ${s.nombre}`}
                   loading="lazy"
                   width={768}

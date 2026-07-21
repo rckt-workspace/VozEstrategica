@@ -15,6 +15,9 @@ interface EventRow {
   ciudad: string;
   descripcion: string | null;
   speaker_id: string | null;
+  imagen_url: string | null;
+  landing_url: string | null;
+  cta_label: string | null;
 }
 interface SpkOpt { id: string; nombre: string }
 
@@ -23,6 +26,7 @@ function AdminEventos() {
   const [spks, setSpks] = useState<SpkOpt[]>([]);
   const [draft, setDraft] = useState({
     titulo: "", fecha: "", ciudad: "", descripcion: "", speaker_id: "",
+    imagen_url: "", landing_url: "", cta_label: "",
   });
   const [loading, setLoading] = useState(true);
 
@@ -39,18 +43,34 @@ function AdminEventos() {
   }
   useEffect(() => { load(); }, []);
 
+  async function uploadImage(file: File): Promise<string | null> {
+    const path = `events/${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+    const { error } = await supabase.storage.from("media").upload(path, file);
+    if (error) { toast.error(error.message); return null; }
+    return supabase.storage.from("media").getPublicUrl(path).data.publicUrl;
+  }
+
   async function save() {
     if (!draft.titulo || !draft.fecha || !draft.ciudad) {
       toast.error("Completá título, fecha y ciudad.");
       return;
     }
     const { error } = await supabase.from("events").insert({
-      ...draft,
+      titulo: draft.titulo,
+      fecha: draft.fecha,
+      ciudad: draft.ciudad,
+      descripcion: draft.descripcion || null,
       speaker_id: draft.speaker_id || null,
+      imagen_url: draft.imagen_url || null,
+      landing_url: draft.landing_url || null,
+      cta_label: draft.cta_label || null,
     });
     if (error) return toast.error(error.message);
     toast.success("Evento creado");
-    setDraft({ titulo: "", fecha: "", ciudad: "", descripcion: "", speaker_id: "" });
+    setDraft({
+      titulo: "", fecha: "", ciudad: "", descripcion: "", speaker_id: "",
+      imagen_url: "", landing_url: "", cta_label: "",
+    });
     load();
   }
 
@@ -82,6 +102,8 @@ function AdminEventos() {
               ))}
             </select>
           </label>
+          <I label="Link externo (opcional)" v={draft.landing_url} on={(v) => setDraft({ ...draft, landing_url: v })} placeholder="/masterclass-de-clientes-a-fans" />
+          <I label="Texto del botón (opcional)" v={draft.cta_label} on={(v) => setDraft({ ...draft, cta_label: v })} placeholder="Reservar mi cupo" />
           <div className="md:col-span-2">
             <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">Descripción</span>
             <textarea
@@ -90,6 +112,21 @@ function AdminEventos() {
               onChange={(e) => setDraft({ ...draft, descripcion: e.target.value })}
               className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3"
             />
+          </div>
+          <div>
+            <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">Imagen (opcional)</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                const url = await uploadImage(f);
+                if (url) setDraft({ ...draft, imagen_url: url });
+              }}
+              className="text-sm"
+            />
+            {draft.imagen_url ? <img src={draft.imagen_url} alt="" className="mt-2 h-24 w-auto rounded-lg" /> : null}
           </div>
         </div>
         <button onClick={save} className="bubble bubble-yellow mt-6 inline-flex items-center gap-2">
@@ -122,11 +159,11 @@ function AdminEventos() {
   );
 }
 
-function I({ label, v, on, type = "text" }: { label: string; v: string; on: (v: string) => void; type?: string }) {
+function I({ label, v, on, type = "text", placeholder }: { label: string; v: string; on: (v: string) => void; type?: string; placeholder?: string }) {
   return (
     <label className="block">
       <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-      <input type={type} value={v} onChange={(e) => on(e.target.value)} className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3" />
+      <input type={type} value={v} placeholder={placeholder} onChange={(e) => on(e.target.value)} className="w-full rounded-2xl border border-foreground/15 bg-background px-4 py-3" />
     </label>
   );
 }
