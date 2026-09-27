@@ -1,17 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { X, MessageCircle } from "lucide-react";
+import { X, Send, MessageCircle } from "lucide-react";
 import { useLocation } from "@tanstack/react-router";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
-}
-
-interface Recommendation {
-  slug?: string;
-  title: string;
-  reason: string;
-  type: string;
 }
 
 interface NextAction {
@@ -20,12 +13,75 @@ interface NextAction {
   href?: string;
 }
 
+function parseMarkdown(text: string): React.ReactNode[] {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (!line.trim()) {
+      elements.push(<br key={`br-${i}`} />);
+      i++;
+      continue;
+    }
+
+    const boldMatch = line.match(/\*\*(.+?)\*\*/g);
+    if (boldMatch) {
+      const parts = line.split(/(\*\*.+?\*\*)/);
+      const rendered = parts.map((part, idx) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <strong key={idx}>{part.slice(2, -2)}</strong>
+          );
+        }
+        return <span key={idx}>{part}</span>;
+      });
+      elements.push(
+        <div key={`line-${i}`} className="mb-2">
+          {rendered}
+        </div>
+      );
+      i++;
+      continue;
+    }
+
+    if (line.startsWith("- ") || line.startsWith("• ")) {
+      elements.push(
+        <div key={`list-${i}`} className="ml-4 mb-1">
+          • {line.replace(/^[-•]\s+/, "")}
+        </div>
+      );
+      i++;
+      continue;
+    }
+
+    elements.push(
+      <div key={`text-${i}`} className="mb-2">
+        {line}
+      </div>
+    );
+    i++;
+  }
+
+  return elements;
+}
+
+const QUICK_ACTIONS = [
+  { label: "Encontrar un speaker", action: "speaker" },
+  { label: "Capacitar a mi equipo", action: "training" },
+  { label: "Explorar programas", action: "programs" },
+  { label: "Solicitar una propuesta", action: "proposal" },
+];
+
 export function PublicVozAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
+  const [showQuickActions, setShowQuickActions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -42,7 +98,7 @@ export function PublicVozAssistant() {
         {
           role: "assistant",
           content:
-            "Hola. Soy el asistente virtual de Voz Estratégica.\n\nPuedo ayudarte a encontrar speakers, conferencias, programas, contenidos o la solución adecuada para tu organización.\n\n¿Qué quieres lograr?",
+            "Hola 👋 Soy el asistente virtual de Voz Estratégica.\n\nPuedo ayudarte a encontrar speakers, conferencias, programas o la solución adecuada para tu organización.\n\n¿Qué quieres lograr?",
         },
       ]);
     }
@@ -53,12 +109,17 @@ export function PublicVozAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const handleQuickAction = (action: string) => {
+    const actionText = QUICK_ACTIONS.find((a) => a.action === action)?.label || action;
+    handleSendMessage(actionText);
+  };
 
-    const userMessage = input.trim();
+  const handleSendMessage = async (messageText: string) => {
+    const userMessage = messageText.trim();
+    if (!userMessage || isLoading) return;
+
     setInput("");
+    setShowQuickActions(false);
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
 
@@ -89,31 +150,27 @@ export function PublicVozAssistant() {
       const agentMsg = data.data.message;
       setMessages((prev) => [...prev, { role: "assistant", content: agentMsg }]);
 
-      // Handle recommendations if present
-      if (data.data.recommendations?.length > 0) {
-        // Recommendations are shown as part of the assistant message flow
-        // Render them as clickable cards below
-      }
-
-      // Handle next action if present
       if (data.data.nextAction) {
         handleNextAction(data.data.nextAction);
       }
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Agent error:", error);
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content:
-              "Disculpa, estoy teniendo dificultades técnicas. Por favor intenta de nuevo.",
+            content: "Disculpa, estoy teniendo dificultades técnicas. Por favor intenta de nuevo.",
           },
         ]);
       }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage(input);
   };
 
   const handleNextAction = (action: NextAction) => {
@@ -125,8 +182,6 @@ export function PublicVozAssistant() {
         if (action.href) window.open(action.href, "_blank");
         break;
       case "contact":
-        window.location.href = "/contratar";
-        break;
       case "proposal":
         window.location.href = "/contratar";
         break;
@@ -137,61 +192,80 @@ export function PublicVozAssistant() {
 
   return (
     <>
-      {/* Assistant Button */}
+      {/* Launcher Button — Left side */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-black text-white shadow-lg transition-transform hover:scale-110 hover:shadow-xl"
-          style={{ bottom: "calc(5.5rem + var(--bottombar-h, 0px))" }}
+          className="fixed left-6 z-40 flex items-center gap-2 rounded-full bg-black px-4 py-3 text-white shadow-lg transition-transform hover:scale-110 hover:shadow-xl sm:left-3"
+          style={{ bottom: "calc(6.5rem + var(--bottombar-h, 0px))" }}
           aria-label="Asistente Voz Estratégica"
         >
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-5 w-5" />
+          <span className="text-sm font-semibold hidden sm:inline">Asistente</span>
         </button>
       )}
 
-      {/* Chat Panel */}
+      {/* Chat Panel — Left side */}
       {isOpen && (
-        <div className="fixed right-6 bottom-20 z-40 flex h-[32rem] w-96 flex-col rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950 sm:w-[calc(100vw-2rem)]">
+        <div
+          className="fixed left-6 z-40 flex flex-col rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950 sm:left-3 sm:right-3"
+          style={{
+            width: "400px",
+            maxWidth: "calc(100vw - 48px)",
+            height: "600px",
+            maxHeight: "calc(100vh - 140px)",
+            bottom: "calc(6.5rem + var(--bottombar-h, 0px))",
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-neutral-200 p-4 dark:border-neutral-800">
-            <div>
-              <h3 className="font-semibold text-neutral-900 dark:text-white">
-                VOZ ESTRATÉGICA
-              </h3>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                Asistente virtual
-              </p>
+          <div className="flex flex-col gap-3 border-b border-neutral-200 bg-gradient-to-r from-neutral-50 to-neutral-100 p-4 dark:border-neutral-800 dark:from-neutral-900 dark:to-neutral-800">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-display font-bold text-neutral-900 dark:text-white uppercase text-sm tracking-wide">
+                    Voz Estratégica
+                  </h3>
+                  <span className="inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                </div>
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+                  Orientación estratégica
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowQuickActions(true);
+                }}
+                className="rounded-full p-1 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+              </button>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="rounded-full p-1 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-              aria-label="Cerrar"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-neutral-950">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-xs rounded-lg px-3 py-2 text-sm ${
+                  className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
                     msg.role === "user"
                       ? "bg-black text-white"
-                      : "bg-neutral-100 text-neutral-900 dark:bg-neutral-900 dark:text-white"
+                      : "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white"
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === "assistant" ? parseMarkdown(msg.content) : msg.content}
                 </div>
               </div>
             ))}
+
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-neutral-100 dark:bg-neutral-900 rounded-lg px-3 py-2">
+                <div className="bg-neutral-100 dark:bg-neutral-800 rounded-xl px-4 py-3">
                   <div className="flex space-x-2">
                     <div className="h-2 w-2 rounded-full bg-neutral-500 animate-bounce" />
                     <div
@@ -206,13 +280,29 @@ export function PublicVozAssistant() {
                 </div>
               </div>
             )}
+
+            {/* Quick Actions */}
+            {showQuickActions && messages.length === 1 && !isLoading && (
+              <div className="mt-6 space-y-2">
+                {QUICK_ACTIONS.map((action) => (
+                  <button
+                    key={action.action}
+                    onClick={() => handleQuickAction(action.action)}
+                    className="w-full text-left rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-900 transition-colors hover:bg-yellow-50 hover:border-yellow-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800"
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
+          {/* Input Footer */}
           <form
             onSubmit={handleSend}
-            className="border-t border-neutral-200 p-4 dark:border-neutral-800"
+            className="border-t border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950"
           >
             <div className="flex gap-2">
               <input
@@ -221,14 +311,15 @@ export function PublicVozAssistant() {
                 onChange={(e) => setInput(e.currentTarget.value)}
                 placeholder="Escribe tu pregunta..."
                 disabled={isLoading}
-                className="flex-1 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-black dark:border-neutral-800 dark:bg-neutral-900 dark:text-white"
+                className="flex-1 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:focus:border-white dark:focus:ring-white disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="rounded-lg bg-black px-3 py-2 text-white disabled:opacity-50 hover:bg-neutral-900"
+                className="rounded-xl bg-black p-2 text-white transition-colors hover:bg-neutral-900 disabled:opacity-50 dark:hover:bg-neutral-800"
+                aria-label="Enviar"
               >
-                →
+                <Send className="h-5 w-5" />
               </button>
             </div>
           </form>
