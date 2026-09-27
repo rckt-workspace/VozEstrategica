@@ -190,14 +190,16 @@ export function PublicVozAssistant() {
 
   if (shouldHide) return null;
 
+  const widgetBottom = "calc(1.5rem + var(--bottombar-h, 0px))";
+
   return (
     <>
       {/* Launcher Button — Left side */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed left-6 z-40 flex items-center gap-2 rounded-full bg-black px-4 py-3 text-white shadow-lg transition-transform hover:scale-110 hover:shadow-xl sm:left-3"
-          style={{ bottom: "calc(6.5rem + var(--bottombar-h, 0px))" }}
+          className="fixed left-6 z-[80] flex items-center gap-2 rounded-full bg-black px-4 py-3 text-white shadow-lg transition-transform hover:scale-110 hover:shadow-xl sm:left-3"
+          style={{ bottom: widgetBottom }}
           aria-label="Asistente Voz Estratégica"
         >
           <MessageCircle className="h-5 w-5" />
@@ -205,39 +207,64 @@ export function PublicVozAssistant() {
         </button>
       )}
 
-      {/* Chat Panel — Left side */}
+      {/* Chat Panel — Shares exact position with launcher */}
       {isOpen && (
         <div
-          className="fixed left-6 z-40 flex flex-col rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950 sm:left-3 sm:right-3"
+          className="fixed left-6 z-[100] flex flex-col rounded-2xl border border-neutral-200 bg-white shadow-2xl transition-all duration-200 dark:border-neutral-800 dark:bg-neutral-950 sm:left-3 sm:right-3"
           style={{
-            width: "400px",
+            width: "390px",
             maxWidth: "calc(100vw - 48px)",
-            height: "600px",
-            maxHeight: "calc(100vh - 140px)",
-            bottom: "calc(6.5rem + var(--bottombar-h, 0px))",
+            height: "min(520px, calc(100dvh - 48px))",
+            maxHeight: "calc(100dvh - 48px)",
+            bottom: widgetBottom,
+            transformOrigin: "bottom left",
+            animation: "fadeInScale 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
           }}
         >
+          <style>{`
+            @keyframes fadeInScale {
+              from {
+                opacity: 0;
+                transform: scale(0.96);
+              }
+              to {
+                opacity: 1;
+                transform: scale(1);
+              }
+            }
+          `}</style>
           {/* Header */}
-          <div className="flex flex-col gap-3 border-b border-neutral-200 bg-gradient-to-r from-neutral-50 to-neutral-100 p-4 dark:border-neutral-800 dark:from-neutral-900 dark:to-neutral-800">
+          <div className="border-b border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display font-bold text-neutral-900 dark:text-white uppercase text-sm tracking-wide">
+              {/* Left: Brand Icon + Title */}
+              <div className="flex min-w-0 items-start gap-3">
+                {/* Brand Badge */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black text-white font-bold text-xs tracking-wider">
+                  VOZ
+                </div>
+
+                {/* Text Content */}
+                <div className="min-w-0 pt-0.5">
+                  <h3 className="font-display font-bold text-neutral-900 dark:text-white uppercase text-sm tracking-wide leading-none">
                     Voz Estratégica
                   </h3>
-                  <span className="inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1.5">
+                    Orientación estratégica
+                  </p>
                 </div>
-                <p className="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
-                  Orientación estratégica
-                </p>
               </div>
+
+              {/* Right: Close Button */}
               <button
-                onClick={() => {
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
                   setIsOpen(false);
                   setShowQuickActions(true);
                 }}
-                className="rounded-full p-1 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"
-                aria-label="Cerrar"
+                className="relative z-[110] pointer-events-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                aria-label="Cerrar asistente"
               >
                 <X className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
               </button>

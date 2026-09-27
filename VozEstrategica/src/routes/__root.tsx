@@ -11,8 +11,6 @@ import { useEffect } from "react";
 
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { TopBar } from "@/components/TopBar";
-import { BottomBar } from "@/components/BottomBar";
 import { PublicVozAssistant } from "@/components/agent/PublicVozAssistant";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -164,35 +162,33 @@ function Shell() {
   }, [router, queryClient]);
 
   const isAdmin = normalizedPathname.startsWith("/admin");
+  const isAuth = normalizedPathname === "/auth";
+  const isControl = normalizedPathname.startsWith("/control");
   const isSalesLanding = normalizedPathname.startsWith("/masterclass");
   const isCampaignLanding = normalizedPathname.startsWith("/mx/");
-  const hideChrome = isAdmin || isSalesLanding || isCampaignLanding;
+  const hideChrome = isAdmin || isControl || isSalesLanding || isCampaignLanding;
 
-  const isMasterclassLanding = normalizedPathname === "/masterclass-de-clientes-a-fans";
-  const hidePromoBars = isMasterclassLanding || isCampaignLanding;
+  // Hide floating tools (PublicVozAssistant + WhatsApp) on admin, auth, and control routes
+  const hidePublicFloatingTools = isAdmin || isAuth || isControl;
 
   return (
     <>
-      {!hidePromoBars && <TopBar />}
       {!hideChrome && <Header />}
       <main
         style={{
           paddingTop: hideChrome
-            ? "var(--topbar-h, 0px)"
-            : "calc(5rem + var(--topbar-h, 0px))",
+            ? "0px"
+            : "calc(5rem + 0px)",
           paddingBottom: "var(--bottombar-h, 0px)",
         }}
       >
         <Outlet />
       </main>
       {!hideChrome && <Footer />}
-      {!hidePromoBars && <BottomBar />}
       <Toaster />
-      {/* WhatsApp floating button — hidden on masterclass landing */}
-      {/* Public Voz Assistant */}
-      <PublicVozAssistant />
+      {!hidePublicFloatingTools && <PublicVozAssistant />}
 
-      {!isSalesLanding && (
+      {!isSalesLanding && !hidePublicFloatingTools && (
         <a
           href="https://wa.me/573106598108?text=%C2%A1Hola!%20Quiero%20una%20propuesta%20de%20aprendizaje%20para%20mi%20equipo%20%28conferencia%2C%20taller%20o%20programa%29."
           target="_blank"
