@@ -34,6 +34,7 @@ import { Route as AdminSuscriptoresRouteImport } from './routes/admin.suscriptor
 import { Route as AdminSpeakersRouteImport } from './routes/admin.speakers'
 import { Route as AdminPedidosLibrosRouteImport } from './routes/admin.pedidos-libros'
 import { Route as AdminLibrosRouteImport } from './routes/admin.libros'
+import { Route as AdminIntelligenceRouteImport } from './routes/admin.intelligence'
 import { Route as AdminGaleriaRouteImport } from './routes/admin.galeria'
 import { Route as AdminEventosRouteImport } from './routes/admin.eventos'
 import { Route as SpeakersDiegoCamachoMexicoRouteImport } from './routes/speakers.diego-camacho.mexico'
@@ -167,6 +168,11 @@ const AdminLibrosRoute = AdminLibrosRouteImport.update({
   path: '/libros',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminIntelligenceRoute = AdminIntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminGaleriaRoute = AdminGaleriaRouteImport.update({
   id: '/galeria',
   path: '/galeria',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/soluciones': typeof SolucionesRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/galeria': typeof AdminGaleriaRoute
+  '/admin/intelligence': typeof AdminIntelligenceRoute
   '/admin/libros': typeof AdminLibrosRoute
   '/admin/pedidos-libros': typeof AdminPedidosLibrosRoute
   '/admin/speakers': typeof AdminSpeakersRoute
@@ -250,6 +257,7 @@ export interface FileRoutesByTo {
   '/soluciones': typeof SolucionesRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/galeria': typeof AdminGaleriaRoute
+  '/admin/intelligence': typeof AdminIntelligenceRoute
   '/admin/libros': typeof AdminLibrosRoute
   '/admin/pedidos-libros': typeof AdminPedidosLibrosRoute
   '/admin/speakers': typeof AdminSpeakersRoute
@@ -284,6 +292,7 @@ export interface FileRoutesById {
   '/soluciones': typeof SolucionesRoute
   '/admin/eventos': typeof AdminEventosRoute
   '/admin/galeria': typeof AdminGaleriaRoute
+  '/admin/intelligence': typeof AdminIntelligenceRoute
   '/admin/libros': typeof AdminLibrosRoute
   '/admin/pedidos-libros': typeof AdminPedidosLibrosRoute
   '/admin/speakers': typeof AdminSpeakersRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/soluciones'
     | '/admin/eventos'
     | '/admin/galeria'
+    | '/admin/intelligence'
     | '/admin/libros'
     | '/admin/pedidos-libros'
     | '/admin/speakers'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/soluciones'
     | '/admin/eventos'
     | '/admin/galeria'
+    | '/admin/intelligence'
     | '/admin/libros'
     | '/admin/pedidos-libros'
     | '/admin/speakers'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/soluciones'
     | '/admin/eventos'
     | '/admin/galeria'
+    | '/admin/intelligence'
     | '/admin/libros'
     | '/admin/pedidos-libros'
     | '/admin/speakers'
@@ -603,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLibrosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/intelligence': {
+      id: '/admin/intelligence'
+      path: '/intelligence'
+      fullPath: '/admin/intelligence'
+      preLoaderRoute: typeof AdminIntelligenceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/galeria': {
       id: '/admin/galeria'
       path: '/galeria'
@@ -651,6 +670,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminEventosRoute: typeof AdminEventosRoute
   AdminGaleriaRoute: typeof AdminGaleriaRoute
+  AdminIntelligenceRoute: typeof AdminIntelligenceRoute
   AdminLibrosRoute: typeof AdminLibrosRoute
   AdminPedidosLibrosRoute: typeof AdminPedidosLibrosRoute
   AdminSpeakersRoute: typeof AdminSpeakersRoute
@@ -661,6 +681,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminEventosRoute: AdminEventosRoute,
   AdminGaleriaRoute: AdminGaleriaRoute,
+  AdminIntelligenceRoute: AdminIntelligenceRoute,
   AdminLibrosRoute: AdminLibrosRoute,
   AdminPedidosLibrosRoute: AdminPedidosLibrosRoute,
   AdminSpeakersRoute: AdminSpeakersRoute,
