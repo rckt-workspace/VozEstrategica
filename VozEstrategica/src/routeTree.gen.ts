@@ -37,6 +37,9 @@ import { Route as AdminLibrosRouteImport } from './routes/admin.libros'
 import { Route as AdminGaleriaRouteImport } from './routes/admin.galeria'
 import { Route as AdminEventosRouteImport } from './routes/admin.eventos'
 import { Route as SpeakersDiegoCamachoMexicoRouteImport } from './routes/speakers.diego-camacho.mexico'
+import { Route as ApiAgentChatRouteImport } from './routes/api.agent.chat'
+import { Route as ApiAdminSessionRouteImport } from './routes/api.admin.session'
+import { Route as ApiAdminAgentRouteImport } from './routes/api.admin.agent'
 
 const SolucionesRoute = SolucionesRouteImport.update({
   id: '/soluciones',
@@ -180,6 +183,21 @@ const SpeakersDiegoCamachoMexicoRoute =
     path: '/speakers/diego-camacho/mexico',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAgentChatRoute = ApiAgentChatRouteImport.update({
+  id: '/api/agent/chat',
+  path: '/api/agent/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSessionRoute = ApiAdminSessionRouteImport.update({
+  id: '/api/admin/session',
+  path: '/api/admin/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAgentRoute = ApiAdminAgentRouteImport.update({
+  id: '/api/admin/agent',
+  path: '/api/admin/agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -209,6 +227,9 @@ export interface FileRoutesByFullPath {
   '/speakers/$slug': typeof SpeakersSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/speakers/': typeof SpeakersIndexRoute
+  '/api/admin/agent': typeof ApiAdminAgentRoute
+  '/api/admin/session': typeof ApiAdminSessionRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
   '/speakers/diego-camacho/mexico': typeof SpeakersDiegoCamachoMexicoRoute
 }
 export interface FileRoutesByTo {
@@ -238,6 +259,9 @@ export interface FileRoutesByTo {
   '/speakers/$slug': typeof SpeakersSlugRoute
   '/admin': typeof AdminIndexRoute
   '/speakers': typeof SpeakersIndexRoute
+  '/api/admin/agent': typeof ApiAdminAgentRoute
+  '/api/admin/session': typeof ApiAdminSessionRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
   '/speakers/diego-camacho/mexico': typeof SpeakersDiegoCamachoMexicoRoute
 }
 export interface FileRoutesById {
@@ -269,6 +293,9 @@ export interface FileRoutesById {
   '/speakers/$slug': typeof SpeakersSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/speakers/': typeof SpeakersIndexRoute
+  '/api/admin/agent': typeof ApiAdminAgentRoute
+  '/api/admin/session': typeof ApiAdminSessionRoute
+  '/api/agent/chat': typeof ApiAgentChatRoute
   '/speakers/diego-camacho/mexico': typeof SpeakersDiegoCamachoMexicoRoute
 }
 export interface FileRouteTypes {
@@ -301,6 +328,9 @@ export interface FileRouteTypes {
     | '/speakers/$slug'
     | '/admin/'
     | '/speakers/'
+    | '/api/admin/agent'
+    | '/api/admin/session'
+    | '/api/agent/chat'
     | '/speakers/diego-camacho/mexico'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -330,6 +360,9 @@ export interface FileRouteTypes {
     | '/speakers/$slug'
     | '/admin'
     | '/speakers'
+    | '/api/admin/agent'
+    | '/api/admin/session'
+    | '/api/agent/chat'
     | '/speakers/diego-camacho/mexico'
   id:
     | '__root__'
@@ -360,6 +393,9 @@ export interface FileRouteTypes {
     | '/speakers/$slug'
     | '/admin/'
     | '/speakers/'
+    | '/api/admin/agent'
+    | '/api/admin/session'
+    | '/api/agent/chat'
     | '/speakers/diego-camacho/mexico'
   fileRoutesById: FileRoutesById
 }
@@ -384,6 +420,9 @@ export interface RootRouteChildren {
   MxDiegoCamachoRoute: typeof MxDiegoCamachoRoute
   SpeakersSlugRoute: typeof SpeakersSlugRoute
   SpeakersIndexRoute: typeof SpeakersIndexRoute
+  ApiAdminAgentRoute: typeof ApiAdminAgentRoute
+  ApiAdminSessionRoute: typeof ApiAdminSessionRoute
+  ApiAgentChatRoute: typeof ApiAgentChatRoute
   SpeakersDiegoCamachoMexicoRoute: typeof SpeakersDiegoCamachoMexicoRoute
 }
 
@@ -585,6 +624,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpeakersDiegoCamachoMexicoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/agent/chat': {
+      id: '/api/agent/chat'
+      path: '/api/agent/chat'
+      fullPath: '/api/agent/chat'
+      preLoaderRoute: typeof ApiAgentChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/session': {
+      id: '/api/admin/session'
+      path: '/api/admin/session'
+      fullPath: '/api/admin/session'
+      preLoaderRoute: typeof ApiAdminSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/agent': {
+      id: '/api/admin/agent'
+      path: '/api/admin/agent'
+      fullPath: '/api/admin/agent'
+      preLoaderRoute: typeof ApiAdminAgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -631,6 +691,9 @@ const rootRouteChildren: RootRouteChildren = {
   MxDiegoCamachoRoute: MxDiegoCamachoRoute,
   SpeakersSlugRoute: SpeakersSlugRoute,
   SpeakersIndexRoute: SpeakersIndexRoute,
+  ApiAdminAgentRoute: ApiAdminAgentRoute,
+  ApiAdminSessionRoute: ApiAdminSessionRoute,
+  ApiAgentChatRoute: ApiAgentChatRoute,
   SpeakersDiegoCamachoMexicoRoute: SpeakersDiegoCamachoMexicoRoute,
 }
 export const routeTree = rootRouteImport
