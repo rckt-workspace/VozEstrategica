@@ -1,0 +1,136 @@
+import { createFileRoute } from "@tanstack/react-router";
+import type {} from "@tanstack/react-start";
+import {
+  verifyInstitutionalPassword,
+  createAdminSessionToken,
+  getSessionCookieHeader,
+  getClearSessionCookieHeader,
+  verifyAdminSessionToken,
+  extractSessionToken,
+  parseCookies,
+} from "@/server/agent/admin/institutional-auth.server";
+
+/**
+ * POST /api/admin/session
+ * Login with institutional password
+ * Returns: { authenticated: true } + HttpOnly cookie
+ *
+ * DELETE /api/admin/session
+ * Logout (clear session cookie)
+ *
+ * GET /api/admin/session
+ * Check session status
+ * Returns: { authenticated: true/false }
+ */
+export const Route = createFileRoute("/api/admin/session")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        try {
+          const body = await request.json() as { password?: string };
+          const password = body?.password;
+
+          if (!password) {
+            return new Response(
+              JSON.stringify({ error: "Password required" }),
+              { status: 400, headers: { "Content-Type": "application/json" } },
+            );
+          }
+
+          // Verify password
+          const isValid = verifyInstitutionalPassword(password);
+          if (!isValid) {
+            return new Response(
+              JSON.stringify({ error: "Invalid password" }),
+              { status: 401, headers: { "Content-Type": "application/json" } },
+            );
+          }
+
+          // Create session token
+          const token = createAdminSessionToken();
+          const isSecure = request.url.startsWith("https");
+
+          // Return with Set-Cookie header
+          return new Response(
+            JSON.stringify({ authenticated: true }),
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Set-Cookie": getSessionCookieHeader(token, isSecure),
+                "Cache-Control": "no-store",
+              },
+            },
+          );
+        } catch (err) {
+          console.error("[AdminSession] POST error:", err);
+          return new Response(
+            JSON.stringify({ error: "Server error" }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
+        }
+      },
+
+      DELETE: async ({ request }) => {
+        // Clear session cookie
+        return new Response(
+          JSON.stringify({ authenticated: false }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Set-Cookie": getClearSessionCookieHeader(),
+              "Cache-Control": "no-store",
+            },
+          },
+        );
+      },
+
+      GET: async ({ request }) => {
+        try {
+          const cookieHeader = request.headers.get("Cookie");
+
+          if (!cookieHeader) {
+            return new Response(
+              JSON.stringify({ authenticated: false }),
+              {
+                status: 200,
+                headers: {
+                  "Content-Type": "application/json",
+                  "Cache-Control": "no-store",
+                },
+              },
+            );
+          }
+
+          const cookies = parseCookies(cookieHeader);
+          const token = extractSessionToken(cookies);
+          const isValid = token ? verifyAdminSessionToken(token) : false;
+
+          return new Response(
+            JSON.stringify({ authenticated: isValid }),
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store",
+              },
+            },
+          );
+        } catch (err) {
+          console.error("[AdminSession] GET error:", err);
+          return new Response(
+            JSON.stringify({ authenticated: false }),
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store",
+              },
+            },
+          );
+        }
+      },
+    },
+  },
+});
