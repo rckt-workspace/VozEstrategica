@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { PublicAgentRequestSchema } from "@/server/agent/core/schemas";
-import { executePublicAgent } from "@/server/agent/public/public-agent.service.server";
+import { PublicAgentRequestSchema } from "@/lib/agent-schemas";
+import { runPublicAgent } from "@/lib/agent-server-boundaries";
 
 /**
  * POST /api/agent/chat
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/agent/chat")({
           }
 
           // Execute agent
-          const response = await executePublicAgent(parsed.data);
+          const response = await runPublicAgent(parsed.data);
 
           return new Response(
             JSON.stringify({
