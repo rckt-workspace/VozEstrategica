@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import {
-  verifyInstitutionalPassword,
-  createAdminSessionToken,
-  getSessionCookieHeader,
-  getClearSessionCookieHeader,
-  verifyAdminSessionToken,
-  extractSessionToken,
-  parseCookies,
-} from "@/server/agent/admin/institutional-auth.server";
+  verifyPassword,
+  createSessionToken,
+  getSessionCookie,
+  getClearSessionCookie,
+  parseCookiesFromHeader,
+  getSessionTokenFromCookies,
+  verifySessionToken,
+} from "@/lib/agent-server-boundaries";
 
 /**
  * POST /api/admin/session
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/admin/session")({
           }
 
           // Verify password
-          const isValid = verifyInstitutionalPassword(password);
+          const isValid = await verifyPassword(password);
           if (!isValid) {
             return new Response(
               JSON.stringify({ error: "Invalid password" }),
@@ -47,8 +47,9 @@ export const Route = createFileRoute("/api/admin/session")({
           }
 
           // Create session token
-          const token = createAdminSessionToken();
+          const token = await createSessionToken();
           const isSecure = request.url.startsWith("https");
+          const setCookieHeader = await getSessionCookie(token, isSecure);
 
           // Return with Set-Cookie header
           return new Response(
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/api/admin/session")({
               status: 200,
               headers: {
                 "Content-Type": "application/json",
-                "Set-Cookie": getSessionCookieHeader(token, isSecure),
+                "Set-Cookie": setCookieHeader,
                 "Cache-Control": "no-store",
               },
             },
@@ -72,18 +73,28 @@ export const Route = createFileRoute("/api/admin/session")({
       },
 
       DELETE: async ({ request }) => {
-        // Clear session cookie
-        return new Response(
-          JSON.stringify({ authenticated: false }),
-          {
-            status: 200,
-            headers: {
-              "Content-Type": "application/json",
-              "Set-Cookie": getClearSessionCookieHeader(),
-              "Cache-Control": "no-store",
+        try {
+          const setCookieHeader = await getClearSessionCookie();
+
+          // Clear session cookie
+          return new Response(
+            JSON.stringify({ authenticated: false }),
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                "Set-Cookie": setCookieHeader,
+                "Cache-Control": "no-store",
+              },
             },
-          },
-        );
+          );
+        } catch (err) {
+          console.error("[AdminSession] DELETE error:", err);
+          return new Response(
+            JSON.stringify({ error: "Server error" }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
+        }
       },
 
       GET: async ({ request }) => {
@@ -103,9 +114,9 @@ export const Route = createFileRoute("/api/admin/session")({
             );
           }
 
-          const cookies = parseCookies(cookieHeader);
-          const token = extractSessionToken(cookies);
-          const isValid = token ? verifyAdminSessionToken(token) : false;
+          const cookies = await parseCookiesFromHeader(cookieHeader);
+          const token = await getSessionTokenFromCookies(cookies);
+          const isValid = token ? await verifySessionToken(token) : false;
 
           return new Response(
             JSON.stringify({ authenticated: isValid }),

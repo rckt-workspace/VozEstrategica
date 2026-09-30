@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { AdminAgentRequestSchema } from "@/server/agent/core/schemas";
-import { executeAdminAgent } from "@/server/agent/admin/admin-agent.service.server";
-import { verifyInstitutionalSession } from "@/server/agent/admin/admin-auth.server";
+import { AdminAgentRequestSchema } from "@/lib/agent-schemas";
+import { verifySession, runAdminAgent } from "@/lib/agent-server-boundaries";
 
 /**
  * POST /api/admin/agent
@@ -17,7 +16,7 @@ export const Route = createFileRoute("/api/admin/agent")({
         try {
           // Verify admin session
           const cookieHeader = request.headers.get("Cookie");
-          const isAuthenticated = verifyInstitutionalSession(cookieHeader);
+          const isAuthenticated = await verifySession(cookieHeader);
 
           if (!isAuthenticated) {
             return new Response(
@@ -55,7 +54,7 @@ export const Route = createFileRoute("/api/admin/agent")({
           }
 
           // Execute admin agent
-          const response = await executeAdminAgent(parsed.data);
+          const response = await runAdminAgent(parsed.data);
 
           return new Response(
             JSON.stringify({
